@@ -3631,19 +3631,14 @@ class Tensor(MathTrait):
     if (base == 0).logical_and(exponent <= 0).any():
         raise ZeroDivisionError("0 cannot be raised to a negative power or zero")
 
-    # TODO: int pow
-    # if not base.is_floating_point(): raise RuntimeError("base needs to be float")
-    # hopefully this works !!
+    # int ** int case
     if base.dtype.is_int() and (isinstance(exponent, Tensor) and exponent.dtype.is_int()):
-      if (exponent < 0).any():
-        raise ValueError("Integer base cannot be raised to a negative integer exponent")
-
-      # Element-wise integer exponentiation
+      if (exponent < 0).any(): raise ValueError("Integer base cannot be raised to a negative integer exponent")
       ret = base._apply_uop(UOp.pow_int, exponent)
       return ret
+    
     # Floating point case
     ret = base._apply_uop(UOp.pow, exponent)
-
     # Cast result back to original dtype if needed
     return ret.round().cast(self.dtype) if not reverse and not dtypes.is_float(self.dtype) else ret
   def maximum(self, x:Tensor|ConstType) -> Tensor:
